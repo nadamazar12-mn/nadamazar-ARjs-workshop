@@ -2,10 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR / VR Mockup</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.3.2/aframe/build/aframe-ar.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #111; color: #eee; }
+        header { padding: 12px; display:flex; gap:8px; align-items:center; background:#0f1720; }
+        button { padding:8px 12px; border-radius:6px; border: none; cursor:pointer; }
+        #controls { margin-left: auto; }
+        #preview { width:100%; height:calc(100vh - 56px); display:block; }
+    </style>
 </head>
 <body>
- <p>hello word</p>
+    <header>
+        <div><strong>AR / VR Mockup</strong></div>
+        <div id="controls">
+            <button id="enter-vr">Enter VR</button>
+            <button id="start-ar">Start AR (Marker)</button>
+            <button id="stop-ar" style="display:none">Stop AR</button>
+        </div>
+    </header>
+
+    <!-- VR Scene (default preview) -->
+    <a-scene id="vr-scene" embedded style="width:100%; height:calc(100vh - 56px);">
+        <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+        <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+        <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+        <a-plane rotation="-90 0 0" width="30" height="30" color="#7BC8A4"></a-plane>
+        <a-entity camera position="0 1.6 0"></a-entity>
+    </a-scene>
+
+    <!-- AR Scene (marker based) - hidden until started -->
+    <a-scene id="ar-scene" vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false;" style="display:none; width:100%; height:calc(100vh - 56px);">
+        <a-marker preset="hiro">
+            <a-box position="0 0.5 0" material="color: red;"></a-box>
+            <a-sphere position="0 1.2 0" radius="0.3" color="#00FFCC"></a-sphere>
+        </a-marker>
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        const vrScene = document.getElementById('vr-scene');
+        const arScene = document.getElementById('ar-scene');
+        const enterVrBtn = document.getElementById('enter-vr');
+        const startArBtn = document.getElementById('start-ar');
+        const stopArBtn = document.getElementById('stop-ar');
+
+        enterVrBtn.addEventListener('click', () => {
+            if (vrScene && vrScene.enterVR) vrScene.enterVR();
+            else alert('VR mode unavailable in this browser. Use an immersive-capable browser or device.');
+        });
+
+        startArBtn.addEventListener('click', () => {
+            // show AR scene and hide VR preview
+            arScene.style.display = 'block';
+            vrScene.style.display = 'none';
+            startArBtn.style.display = 'none';
+            stopArBtn.style.display = 'inline-block';
+        });
+
+        stopArBtn.addEventListener('click', () => {
+            arScene.style.display = 'none';
+            vrScene.style.display = 'block';
+            startArBtn.style.display = 'inline-block';
+            stopArBtn.style.display = 'none';
+            // try to stop camera if AR.js exposed it
+            if (window.ARjs && window.ARjs.Context && ARjs.Context.prototype && ARjs.Context.prototype.arController) {
+                // best-effort cleanup placeholder
+            }
+        });
+    </script>
 </body>
 </html>
